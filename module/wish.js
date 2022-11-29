@@ -1,23 +1,20 @@
-const mysql = require('mysql')
-class connectDB{
-    constructor(){
-        const connection = mysql.createConnection({
-            host: 'localhost',
-            user: 'root',
-            password: '',
-            database: 'smarthomedb'
-        })
-        connection.connect(function(err){
-            if (err) {
-                console.error('error connecting: ' + err.stack);
-                return;
-            }else{
-                console.log('Success')
-                return connection;
-            }
-        })
-    }
-}
+const mysql = require("mysql"),
+      connection = mysql.createConnection({
+          host: "localhost",
+          user: "root",
+          password: "",
+          database: "smarthomedb"
+      });
 
-module.exports = connectDB;
+connection.connect(function (err) {
+    if (err) {
+      console.error(err);
+      throw err;
+   } else {
+    console.log("Connection to database was successful");
+  }
+});
 
+module.exports =  {
+  getConnection() { return connection; }
+};
