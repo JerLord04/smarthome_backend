@@ -13,7 +13,8 @@ app.get('/', function(req, res) {
         db.query("SELECT * FROM random_wish_db", function (err, result, fields) {
           if (err) throw err;
           console.log(result);
-          res.send(result[0].wishtext)
+          const randomNumber = Math.floor(Math.random() * 7)
+          res.json(result)
         });
       });
     
