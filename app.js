@@ -1,11 +1,10 @@
 const express = require('express')
 const request = require('request');
 const app = express()
-
+// const http = require('http').createServer(app);
 const dotenv = require('dotenv');
 dotenv.config();
 
-const port = 3000
 const connect_db = require('./module/connectDB');
 db = connect_db.getConnection()
 const bodyParser = require('body-parser');
@@ -17,10 +16,13 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // app.use('/api/v1', require('./module/api_v1'));
 // app.use('/api/v2', require('./module/api_v2'));
 
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/socketClient.html');
+});
+
 app.post('/insert_data', function (req, res) {
   const data = req.body;
   console.log(data);
-
   const sql = `INSERT INTO devices( id_room, id_sensor) VALUES (${data.room_id},${data.sensor_id})`;
   db.connect(function (err) {
     db.query(sql, function (err, result, fields) {
@@ -134,9 +136,11 @@ app.post('/test_line_notify_room2', (req, res) => {
   });
 });
 
+app.listen(3000, () => {
+  console.log('listening on *:3000');
+});
 
-
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
+// app.listen(port, () => {
+//   console.log(`Example app listening on port ${port}`)
+// })
 
