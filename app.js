@@ -38,6 +38,10 @@ app.post('/insert_data', function (req, res) {
   });
 });
 
+app.get('/search', (req, res) => {
+  console.log(req.query.ID);
+})
+
 app.post('/delete_device', function (req, res) {
   const data = req.body;
   console.log(data.room_id)
@@ -135,6 +139,28 @@ app.post('/test_line_notify_room2', (req, res) => {
     }
   });
 });
+
+app.post('/test_insert_dateTime', (req, res) => {
+  const datetime = new Date().toISOString().slice(0, 19).replace('T', '');
+  const sql = 'INSERT INTO humidity_tb (date,value) VALUES ((NOW()),?)';
+  const params = [35.5];
+  db.query(sql, params, (error, results, fields) => {
+    if (error) throw error;
+    console.log("Insert successfully");
+  })
+})
+
+app.post('/get_room_name', (req, res) => {
+  data = req.body;
+  console.log(data.room_id);
+  db.query(`SELECT * FROM room_tb WHERE id = ${data.room_id}`, (error, results) => {
+    if (error) console.log(error);
+    res.send(results);
+    console.log(results)
+  });
+
+});
+
 
 app.listen(3000, () => {
   console.log('listening on *:3000');
