@@ -38,6 +38,17 @@ app.post('/insert_data', function (req, res) {
   });
 });
 
+app.post('/update_room_name', (req, res) => {
+  const data = req.body;
+  console.log(data);
+  const sql = `UPDATE room_tb SET name = ? WHERE id = ?`;
+  const params = [data.newname, data.room_id];
+  db.query(sql, params, (error, results, fields) => {
+    if (error) throw error;
+    console.log("Update successful");
+  })
+})
+
 app.get('/search', (req, res) => {
   console.log(req.query.ID);
 })
