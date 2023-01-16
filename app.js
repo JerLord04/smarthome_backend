@@ -1,5 +1,7 @@
 const express = require('express')
 const request = require('request');
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 const app = express()
 // const http = require('http').createServer(app);
 const dotenv = require('dotenv');
@@ -46,6 +48,11 @@ app.post('/update_room_name', (req, res) => {
   db.query(sql, params, (error, results, fields) => {
     if (error) throw error;
     console.log("Update successful");
+    msg = {
+      newname: data.newname,
+      status: 'Rename successful',
+    }
+    res.send(msg);
   })
 })
 
@@ -62,7 +69,7 @@ app.post('/delete_device', function (req, res) {
       if (err) throw err;
       const data_result = {
         'status': true,
-        'msg': 'Successful device removal'
+        'msg': 'Successful device remove'
       }
       res.send(data_result)
     });
@@ -171,6 +178,96 @@ app.post('/get_room_name', (req, res) => {
   });
 
 });
+
+app.post('/get_all_room_name', (req, res) => {
+  db.query(`SELECT * FROM room_tb`, (error, results) => {
+    if (error) console.log(error);
+    res.send(results);
+    console.log(results)
+  });
+})
+
+app.get('/count_pin_data', (req, res) => {
+  const sql = 'SELECT COUNT(id) as count FROM pin_tb;'
+  db.query(sql,  (error, results) => {
+    console.log(results[0].count);
+    const count_data = {
+      count : results[0].count
+    }
+    res.send(count_data);
+  });
+})
+
+app.post('/generate_token', (req, res) => {
+  let pin = req.body.pin_num
+  const sql = 'SELECT * FROM pin_tb ORDER BY id DESC LIMIT 1;'
+  db.query(sql, async (error, results) => {
+    if (error) console.log(error);
+    if ((await bcrypt.compare(pin, results[0].pincode))) {
+      const payload = {
+        userId: results[0].id,
+        pin: results[0].pincode,
+      };
+      const options = {
+        expiresIn: '1h'
+      };
+      const token = jwt.sign(payload, process.env.TOKEN_KEY, options);
+      console.log("True");
+      const response = {
+        status: true,
+        id: results[0].id,
+        pin: results[0].pincode,
+        token: token,
+      }
+      res.send(response)
+    } else {
+      const response = {
+        status: false,
+        msg: "Invalid"
+      }
+      console.log("False");
+      res.send(response)
+    }
+
+  });
+})
+
+app.post('/insert_pin', async (req, res) => {
+  console.log(req.body.pin_num);
+  encryptedPassword = await bcrypt.hash(req.body.pin_num, 10)
+  const sql = 'INSERT INTO pin_tb (pincode) VALUES (?)';
+  const params = [encryptedPassword];
+  db.query(sql, params, (error, results, fields) => {
+    if (error) throw error;
+    console.log("Insert successfully");
+    msg = {
+      status: true,
+      txt: "Insert successfully"
+    }
+    res.send(msg)
+  })
+  // muti
+  // result.forEach(val => {
+  //   let data = [];
+  //   let _data = {
+  //     id: val.id,
+  //     pin: val.pin,
+  //   }
+  //   data.push(_data);
+  // });
+
+  // // 1 only
+  // let data = {
+  //   id: result[0].id,
+  //   pin: result[0].pin,
+  //   token: token
+  // }
+  // const send_data = {
+  //   data,
+  //   token : 12434
+  // }
+
+})
 
 
 app.listen(3000, () => {
