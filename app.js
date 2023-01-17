@@ -2,6 +2,7 @@ const express = require('express')
 const request = require('request');
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const auth = require('./middleware/auth')
 const app = express()
 // const http = require('http').createServer(app);
 const dotenv = require('dotenv');
@@ -209,7 +210,7 @@ app.post('/generate_token', (req, res) => {
         pin: results[0].pincode,
       };
       const options = {
-        expiresIn: '1h'
+        expiresIn: '180000'
       };
       const token = jwt.sign(payload, process.env.TOKEN_KEY, options);
       console.log("True");
@@ -230,6 +231,14 @@ app.post('/generate_token', (req, res) => {
     }
 
   });
+})
+
+app.post('/verifytoken' , auth , (req,res) => {
+  msg = {
+    status : true,
+    txt : "good_token"
+  }
+  res.send(msg)
 })
 
 app.post('/insert_pin', async (req, res) => {
